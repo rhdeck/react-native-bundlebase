@@ -1,0 +1,29 @@
+{
+  "name": "react-native-bundlebase",
+  "version": "1.0.0",
+  "description": "Make the bundle identifier unique to your organization",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhdeck/react-native-bundlebase.git"
+  },
+  "author": "Ray Deck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhdeck/react-native-bundlebase/issues"
+  },
+  "rnpm": {
+    "commands": {
+      "postlink": "node ./node_modules/react-native-bundlebase/bin/fixbundle.js"
+    }
+  },
+  "homepage": "https://github.com/rhdeck/react-native-bundlebase#readme",
+  "dependencies": {
+    "deasync-promise": "^1.0.1",
+    "glob": "^7.1.2",
+    "inquirer": "^4.0.0"
+  }
+}
