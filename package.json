@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/rhdeck/react-native-bundlebase#readme",
   "dependencies": {
-    "deasync-promise": "^1.0.1",
     "glob": "^7.1.2",
-    "inquirer": "^4.0.0"
+    "inquirer": "^4.0.0",
+    "xcode": "rhdeck/cordova-node-xcode"
   }
 }
