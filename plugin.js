@@ -37,6 +37,5 @@ module.exports = [
         if (global) set("bundlebase", newbundlebase);
       });
     }
-  },
-  {}
+  }
 ];
