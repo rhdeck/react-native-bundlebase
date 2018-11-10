@@ -1,22 +1,25 @@
 const {
   updatePbxproj,
   updatePlist,
-  getBundleFromPbxproj,
-  getNameFromBundle
+  getNameFromPbxproj
+  //   getBundleFromPbxproj,
+  //   getNameFromBundle
 } = require("xcode-bundle-management");
 const { set } = require("rninfo-manager");
-const { getPlists, getPbxProjs } = require("./");
+const { getPlists, getPbxprojs } = require("./");
 const { writeFileSync } = require("fs");
+const { join } = require("path");
 module.exports = [
   {
     name: "set-bundle <newbundle>",
     description: "Set the bundle id for native code",
     func: ([newbundle]) => {
       getPlists().forEach(updatePlist);
-      getPbxProjs().forEach(p => updatePbxproj(p, newbundle));
-      let p = require("package.json");
+      getPbxprojs().forEach(p => updatePbxproj(p, newbundle));
+      const ppath = join(process.cwd(), "package.json");
+      let p = require(ppath);
       p.iosBundle = newbundle;
-      writeFileSync("package.json", JSON.stringify(p, null, 2));
+      writeFileSync(ppath, JSON.stringify(p, null, 2));
     }
   },
   {
@@ -30,12 +33,18 @@ module.exports = [
     ],
     func: ([newbundlebase], _, { global }) => {
       getPlists().forEach(updatePlist);
-      getPbxProjs().forEach(p => {
-        const name = getNameFromBundle(getBundleFromPbxproj(p));
-        const bundle = `${newbundlebase}.${name}`;
-        updatePbxproj(p, bundle);
-        if (global) set("bundlebase", newbundlebase);
+      getPbxprojs().forEach(p => {
+        const name = getNameFromPbxproj(p);
+        if (name) {
+          const bundle = `${newbundlebase}.${name}`;
+          updatePbxproj(p, bundle);
+          const ppath = join(process.cwd(), "package.json");
+          let o = require(ppath);
+          o.iosBundle = bundle;
+          writeFileSync(ppath, JSON.stringify(o, null, 2));
+        }
       });
+      if (global) set("bundlebase", newbundlebase);
     }
   }
 ];
