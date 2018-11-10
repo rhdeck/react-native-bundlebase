@@ -16,6 +16,7 @@
     "url": "https://github.com/rhdeck/react-native-bundlebase/issues"
   },
   "rnpm": {
+    "plugin": "plugin.js",
     "commands": {
       "postlink": "node ./node_modules/react-native-bundlebase/bin/fixbundle.js"
     }
@@ -23,7 +24,7 @@
   "homepage": "https://github.com/rhdeck/react-native-bundlebase#readme",
   "dependencies": {
     "glob": "^7.1.2",
-    "inquirer": "^4.0.0",
-    "xcode": "rhdeck/cordova-node-xcode"
+    "rninfo-manager": "^1.1.0",
+    "xcode-bundle-management": "rhdeck/xcode-bundle-management"
   }
 }

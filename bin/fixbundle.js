@@ -1,94 +1,39 @@
 #!/usr/bin/env node
-const glob = require("glob");
-const fs = require("fs");
-const path = require("path");
-const plist = require("plist");
-const inquirer = require("inquirer");
-const xcode = require("xcode");
+const {
+  getBaseFromBundle,
+  getNameFromBundle,
+  updatePlist,
+  updatePbxproj,
+  getBundleFromPbxproj,
+  getBundleFromPackage
+} = require("xcode-bundle-management");
+const { get } = require("rninfo-manager");
+const { getPlists, getPbxprojs } = require("../");
 (async () => {
-  //Get my directory
-  var thisPath = process.cwd();
-  var plists = glob.sync(path.join(thisPath, "ios", "*", "Info.plist"));
-  var pbxprojs = glob.sync(path.join(thisPath, "ios", "*", "project.pbxproj"));
+  var plists = getPlists();
+  var pbxprojs = getPbxprojs();
   const defaultBase = "org.reactjs.native.example";
-  let found =
-    plists.find(path => {
-      const source = fs.readFileSync(path, "utf8");
-      const o = plist.parse(source);
-      return (
-        o.CFBundleIdentifier && o.CFBundleIdentifier.startsWith(defaultBase)
-      );
-    }) ||
-    pbxprojs.find(path => {
-      const source = fs.readFileSync(path, "utf8");
-      return source.indexOf(defaultBase) > -1;
-    });
-
-  if (!found) return;
-
-  //FIgure out the new default
-  const homefile = process.env.HOME + "/.rninfo";
-  var homeinfo;
-  if (fs.existsSync(homefile)) {
-    homeinfo = JSON.parse(fs.readFileSync(homefile));
-  } else {
-    homeinfo = {};
-  }
-  if (!homeinfo.bundleBase) {
-    try {
-      const answers = await inquirer.prompt([
-        {
-          message:
-            "You do not have a saved bundlebase.\nWhat is the base ID you would use for your organization? (e.g. com.mycompany for an app that would be eventually com.mycompany.myapp)",
-          name: "bundle",
-          validate: answer => {
-            if (!answer.length)
-              return "You need to reply with a string of some length";
-            return true;
-          }
-        }
-      ]);
-      const newbundle = answers.bundle;
-      homeinfo.bundleBase = newbundle;
-      fs.writeFileSync(homefile, JSON.stringify(homeinfo));
-    } catch (e) {
-      console.log("Got an error", err);
-      process.exit(1);
-    }
-  }
-  plists.forEach(path => {
-    const source = fs.readFileSync(path, "utf8");
-    var o = plist.parse(source);
-    if (o.CFBundleIdentifier) {
-      if (o.CFBundleIdentifier.startsWith(defaultBase)) {
-        if (homeinfo.bundleBase) {
-          o.CFBundleIdentifier = o.CFBundleIdentifier.replace(
-            defaultBase,
-            homeinfo.bundleBase
-          );
-          const xml = plist.build(o);
-          fs.writeFileSync(path, xml);
-        }
+  var { iosBundle } = require("package.json");
+  if (iosBundle) {
+    plists.forEach(updatePlist);
+    pbxprojs.forEach(p => updatePbxproj(p, iosBundle));
+  } else if (
+    pbxprojs.find(v => getBundleFromPbxproj(v).startsWith(defaultBase))
+  ) {
+    const bundleBase = await get(
+      "bundle",
+      "You do not have a saved bundlebase.\nWhat is the base ID you would use for your organization? (e.g. com.mycompany for an app that would be eventually com.mycompany.myapp)",
+      answer => (answer.length ? true : "You need a string of some length")
+    );
+    plists.forEach(updatePlist);
+    pbxprojs.forEach(p => {
+      const oldBundle = getBundleFromPackage(p);
+      const oldBase = getBaseFromBundle(oldBundle);
+      if (oldBase == defaultBase) {
+        const oldName = getNameFromBundle(oldBundle);
+        const newBundle = `${bundleBase}.${oldName}`;
+        updatePbxproj(p, newBundle);
       }
-    }
-  });
-  pbxprojs.forEach(path => {
-    const project = xcode.project(path);
-    project.parseSync();
-    Object.keys(project.pbxXCBuildConfigurationSection())
-      .filter(k => !k.endsWith("_comment"))
-      .forEach(k => {
-        const o = project.pbxXCBuildConfigurationSection()[k];
-        if (!o.isa == "XCBuildConfiguration") return;
-        const oldName = o.buildSettings.PRODUCT_BUNDLE_IDENTIFIER;
-        if (!oldName) return;
-        if (oldName.startsWith('"' + defaultBase)) {
-          project.addBuildProperty(
-            "PRODUCT_BUNDLE_IDENTIFIER",
-            '"' + homeinfo.bundleBase + oldName.substring(defaultBase.length)
-          );
-        }
-      });
-    fs.writeFileSync(path, project.writeSync());
-  });
+    });
+  }
 })();
