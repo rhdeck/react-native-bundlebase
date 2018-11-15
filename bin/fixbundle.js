@@ -9,11 +9,12 @@ const {
 } = require("xcode-bundle-management");
 const { get } = require("rninfo-manager");
 const { getPlists, getPbxprojs } = require("../");
+const { join } = require("path");
 (async () => {
   var plists = getPlists();
   var pbxprojs = getPbxprojs();
   const defaultBase = "org.reactjs.native.example";
-  var { iosBundle } = require("package.json");
+  var { iosBundle } = require(join(process.cwd(), "package.json"));
   if (iosBundle) {
     plists.forEach(updatePlist);
     pbxprojs.forEach(p => updatePbxproj(p, iosBundle));

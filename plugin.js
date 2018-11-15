@@ -9,6 +9,7 @@ const { set } = require("rninfo-manager");
 const { getPlists, getPbxprojs } = require("./");
 const { writeFileSync } = require("fs");
 const { join } = require("path");
+const { spawnSync } = require("child_process");
 module.exports = [
   {
     name: "set-bundle <newbundle>",
@@ -42,6 +43,9 @@ module.exports = [
           let o = require(ppath);
           o.iosBundle = bundle;
           writeFileSync(ppath, JSON.stringify(o, null, 2));
+          spawnSync(join(__dirname, "bin", "fixbundle.js"), [], {
+            stdio: "inherit"
+          });
         }
       });
       if (global) set("bundlebase", newbundlebase);
