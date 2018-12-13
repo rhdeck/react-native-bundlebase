@@ -25,6 +25,6 @@
   "dependencies": {
     "glob": "^7.1.2",
     "rninfo-manager": "^1.1.0",
-    "xcode-bundle-management": "rhdeck/xcode-bundle-management"
+    "xcode-bundle-management": "^1.0.1"
   }
 }
