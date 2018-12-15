@@ -24,7 +24,8 @@ const { join } = require("path");
     const bundleBase = await get(
       "bundle",
       "You do not have a saved bundlebase.\nWhat is the base ID you would use for your organization? (e.g. com.mycompany for an app that would be eventually com.mycompany.myapp)",
-      answer => (answer.length ? true : "You need a string of some length")
+      answer =>
+        answer && answer.length ? true : "You need a string of some length"
     );
     plists.forEach(updatePlist);
     pbxprojs.forEach(p => {
