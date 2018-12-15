@@ -22,12 +22,18 @@ const { join } = require("path");
     pbxprojs.find(v => getBundleFromPbxproj(v).startsWith(defaultBase))
   ) {
     const bundleBase = await get(
-      "bundle",
+      "bundleBase",
       "You do not have a saved bundlebase.\nWhat is the base ID you would use for your organization? (e.g. com.mycompany for an app that would be eventually com.mycompany.myapp)",
       answer =>
         answer && answer.length ? true : "You need a string of some length"
     );
     plists.forEach(updatePlist);
+    if (!bundleBase) {
+      console.error(
+        "Could not set base bundle because the bundlebase is undefined"
+      );
+      return;
+    }
     pbxprojs.forEach(p => {
       const oldBundle = getBundleFromPbxproj(p);
       const oldBase = getBaseFromBundle(oldBundle);
