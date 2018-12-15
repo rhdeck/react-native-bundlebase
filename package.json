@@ -1,6 +1,6 @@
 {
   "name": "react-native-bundlebase",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Make the bundle identifier unique to your organization",
   "main": "index.js",
   "scripts": {
