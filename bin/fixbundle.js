@@ -29,7 +29,7 @@ const { join } = require("path");
     );
     plists.forEach(updatePlist);
     pbxprojs.forEach(p => {
-      const oldBundle = getBundleFromPackage(p);
+      const oldBundle = getBundleFromPbxproj(p);
       const oldBase = getBaseFromBundle(oldBundle);
       if (oldBase == defaultBase) {
         const oldName = getNameFromBundle(oldBundle);
