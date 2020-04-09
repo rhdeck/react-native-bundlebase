@@ -1,7 +1,7 @@
 const {
   updatePbxproj,
   updatePlist,
-  getNameFromPbxproj
+  getNameFromPbxproj,
   //   getBundleFromPbxproj,
   //   getNameFromBundle
 } = require("xcode-bundle-management");
@@ -19,16 +19,10 @@ module.exports = {
         {
           name: "--skip",
           description: "Skip updating app.json to new name",
-          default: false
-        }
+          default: false,
+        },
       ],
       func: ([newbundle], _, { skip }) => {
-        getPlists().forEach(updatePlist);
-        getPbxprojs().forEach(p => updatePbxproj(p, newbundle));
-        const ppath = join(process.cwd(), "package.json");
-        let p = require(ppath);
-        p.iosBundle = newbundle;
-        writeFileSync(ppath, JSON.stringify(p, null, 2));
         const appPath = join(process.cwd(), "app.json");
         if (!skip && existsSync(appPath)) {
           const baseName = newbundle.split(".").pop();
@@ -38,7 +32,13 @@ module.exports = {
             writeFileSync(appPath, JSON.stringify(appjson, null, 2));
           }
         }
-      }
+        getPlists().forEach(updatePlist);
+        getPbxprojs().forEach((p) => updatePbxproj(p, newbundle));
+        const ppath = join(process.cwd(), "package.json");
+        let p = require(ppath);
+        p.iosBundle = newbundle;
+        writeFileSync(ppath, JSON.stringify(p, null, 2));
+      },
     },
     {
       name: "set-bundlebase [newbase]",
@@ -47,15 +47,15 @@ module.exports = {
       options: [
         {
           command: "-g --global",
-          description: "Set value in my user-wide .rninfo file as well"
-        }
+          description: "Set value in my user-wide .rninfo file as well",
+        },
       ],
       func: ([newbundlebase], _, { global }) => {
         getPlists().forEach(updatePlist);
-        getPbxprojs().forEach(p => {
+        getPbxprojs().forEach((p) => {
           const name = getNameFromPbxproj(p);
           if (name) {
-            if (newBundleBase) {
+            if (newbundlebase) {
               const bundle = `${newbundlebase}.${name}`;
               updatePbxproj(p, bundle);
               const ppath = join(process.cwd(), "package.json");
@@ -64,12 +64,12 @@ module.exports = {
               writeFileSync(ppath, JSON.stringify(o, null, 2));
             }
             spawnSync(join(__dirname, "bin", "fixbundle.js"), [], {
-              stdio: "inherit"
+              stdio: "inherit",
             });
           }
         });
         if (global) set("bundlebase", newbundlebase);
-      }
-    }
-  ]
+      },
+    },
+  ],
 };
